@@ -1,24 +1,23 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"log"
-	"math"
 	"strings"
 )
 
 func main() {
-
+	// Task A
 	unformattedPath := "/.././dffg/ddsd/ //sdfd/"
+
 	fmt.Println(simplifyPath(unformattedPath))
 
-	nums := []int{1, 0, -1, 0, -2, 2}
-	target := 0
+	// Task B
+	nums := []int{2, 2, 2, 2, 2}
+	target := 8
 
-	res := fourSum(nums, target)
+	res := fourSum2(nums, target)
 
-	fmt.Println("Result is:", res)
+	fmt.Println("Fours is:", res)
 
 }
 
@@ -60,65 +59,80 @@ func simplifyPath(unformattedPath string) string {
 	return result
 }
 
-func fourSum(nums []int, target int) [][]int {
-	if target > int(math.Pow10(9)) || target < -int(math.Pow10(9)) {
-		fmt.Println("Illegal target:", target)
-	}
+func fourSum2(nums []int, target int) [][]int {
+
 	var result [][]int
+	pairs := findPairs(nums)
+	triples := findTriples(nums, pairs)
+	fours := findFours(nums, triples)
 
-	for {
-		var usedIndexes []int
+	for _, four := range fours {
 		var sum int
-		if len(nums) < 4 {
-			break
-		}
-		for len(usedIndexes) < 4 {
-
-			usedIndexesUpdated, err := findNextNum(usedIndexes, nums)
-			if err != nil {
-				log.Println("wrong loop")
-			}
-			usedIndexes = usedIndexesUpdated
-		}
-		var resultFour []int
-		for _, index := range usedIndexes {
+		for _, index := range four {
 			sum += nums[index]
-			resultFour = append(resultFour, nums[index])
 		}
+
 		if sum == target {
-			var isDoublicate bool
-			log.Println("Sum:", sum)
-			for _, four := range result {
-				if four[0] == resultFour[0] && four[1] == resultFour[1] && four[2] == resultFour[2] && four[3] == resultFour[3] {
-					isDoublicate = true
-				}
-			}
-			if !isDoublicate {
+			resultFour := []int{nums[four[0]], nums[four[1]], nums[four[2]], nums[four[3]]}
+			if !isDuplicate(result, resultFour) {
 				result = append(result, resultFour)
 			}
 		}
-		nums = nums[1:]
-		log.Println("Length of nums:", len(nums))
 	}
 
 	return result
 }
 
-func findNextNum(usedIndexes []int, nums []int) (usedIndexesUpdated []int, err error) {
-	log.Println("In findNextNum", usedIndexes)
-	usedIndexesUpdated = usedIndexes
+func findPairs(nums []int) (pairs [][]int) {
+
 	for i, _ := range nums {
-		if !contains(usedIndexes, i) {
-			usedIndexesUpdated = append(usedIndexes, i)
-			return usedIndexesUpdated, nil
+		for j, _ := range nums {
+			var pair []int
+			pair = append(pair, i)
+			if j > i {
+				pair = append(pair, j)
+				pairs = append(pairs, pair)
+			}
 		}
 	}
-	return usedIndexesUpdated, errors.New("no suetable nums")
+	return pairs
 }
 
-func contains(s []int, i int) bool {
-	for _, a := range s {
-		if a == i {
+func findTriples(nums []int, pairs [][]int) (triples [][]int) {
+	for _, pair := range pairs {
+		for j, _ := range nums {
+			var triple []int
+			triple = pair
+			if j > pair[1] {
+				triple = append(triple, j)
+			}
+			if len(triple) == 3 {
+				triples = append(triples, triple)
+			}
+		}
+	}
+	return triples
+}
+
+func findFours(nums []int, triples [][]int) [][]int {
+	var fours [][]int
+	for _, triple := range triples {
+		for j, _ := range nums {
+			var four = make([]int, 3)
+			copy(four, triple)
+			if j > triple[2] {
+				four = append(four, j)
+				fours = append(fours, four)
+			}
+
+		}
+	}
+	return fours
+}
+
+func isDuplicate(result [][]int, second []int) bool {
+	for _, four := range result {
+		if four[0] == second[0] && four[1] == second[1] && four[2] == second[2] && four[3] == second[3] {
 			return true
 		}
 	}
